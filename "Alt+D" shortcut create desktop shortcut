@@ -1,0 +1,53 @@
+;This script is writen by AutoHotKey language for creating desktop shortcut with keyboard shortcut"Alt+D"
+;When you are in Windows explore or desktop ,the script will  be activated after enter "Alt+D".
+;This script is edited by "dafenqikepu", you can't use it for commercial use.
+#NoEnv  ; Recommended for performance and compatibility with future AutoHotkey releases.
+ #Warn  ; Enable warnings to assist with detecting common errors.
+SendMode Input  ; Recommended for new scripts due to its superior speed and reliability.
+SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
+TrayTip:="Alt+D to create desktop shortcut" 
+TrayIconFile:=A_WinDir . "\System32\DDORes.dll" ; 
+TrayIconNum:="-2108" ;
+Menu,Tray,Tip,%TrayTip%
+Menu,Tray,Icon,%TrayIconFile%,%TrayIconNum%
+
+#IfWinActive ahk_exe explorer.exe
+!d:: ;This is the shortcut, you can change it as you like(! means Alt,^ means Ctrl，# means Win)
+ControlGetFocus, mycontrol,A
+if(mycontrol = "DirectUIHWND3" or mycontrol = "SysListView321")
+{
+clipboard = 
+SendInput, {Control Down}c{Control Up}
+ClipWait,0
+folder_path_set := []
+file_path_set := []
+file_name_ex_set := []
+folder_name_set :=[]
+file_name_set := []
+i =1
+j =1
+Loop, parse, clipboard, `n, `r
+{
+   FileGetAttrib, Attributes,  %A_LoopField%
+if InStr(Attributes, "A")
+{
+file_path_set.Insert(i, A_LoopField)
+file_name_ex_set[i] := RegExReplace(file_path_set[i], "m)^.+\\", "")
+file_name_set[i]  := RegExReplace(file_name_ex_set[i], "mU)\.[0-9a-z]+$")
+file_path := file_path_set[i]
+file_name := file_name_set[i]
+FileCreateShortcut, %file_path%, %A_Desktop%\ %file_name%-shortcut.lnk
+i++
+}
+else if InStr(Attributes, "D")
+{
+folder_path_set.Insert(j, A_LoopField)
+folder_name_set[j] := RegExReplace(folder_path_set[j], "m)^.+\\", "")
+folder_path := folder_path_set[j]
+folder_name := folder_name_set[j]
+FileCreateShortcut, %folder_path%, %A_Desktop%\ %folder_name%-shortcut.lnk
+j++
+}
+}
+}
+#IfWinActive
